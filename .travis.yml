@@ -1,0 +1,6 @@
+language: java
+
+script: "mvn cobertura:cobertura"
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash) -t 8f4dfd70-9e2f-4405-945c-d93500a88189
