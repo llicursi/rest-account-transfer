@@ -15,8 +15,13 @@ public class AccountService {
 
     private static final Logger log = LoggerFactory.getLogger(AccountService.class);
 
-    @Autowired
     private AccountRepository accountRepository;
+
+    @Autowired
+    public AccountService(final AccountRepository accountRepository){
+        this.accountRepository = accountRepository;
+    }
+
 
     /**
      * Retrieve the complete list of Accounts
