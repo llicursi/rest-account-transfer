@@ -13,10 +13,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class AccountServiceTest {
+public class AccountServiceIntegrationTest {
 
     @Autowired
-    AccountService autoService ;
+    AccountService autoService;
 
     // Tests for :
     // public Account save(Account account) {
