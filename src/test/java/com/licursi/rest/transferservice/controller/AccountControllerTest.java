@@ -81,18 +81,6 @@ public class AccountControllerTest {
 
     }
 
- /* Unnecessary stubbings detected in test class
-    @Test
-    public void whenPutAccount_thenStatusMethodNotAllowed() throws Exception {
-        Account account = getArrayOfAccounts().get(0);
-        when(accountService.save(account)).thenReturn(account);
-        this.mockMvc.perform(put("/account")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(account)))
-                .andExpect(status().isMethodNotAllowed());
-    }*/
-
-
     /**
      * Generates a list of accounts for testing, using game of thrones characters
      * @return List of Accounts

@@ -1,5 +1,6 @@
 package com.licursi.rest.transferservice.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -15,13 +16,14 @@ import java.math.BigDecimal;
 
 @Data
 @ToString
+@AllArgsConstructor
 @NoArgsConstructor
 @Entity
 public class Account {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @NotNull
     private String name;

@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class AccountServiceIntegrationTest {
 
     @Autowired
-    AccountService autoService;
+    private AccountService accountService;
 
     // Tests for :
     // public Account save(Account account) {
@@ -29,7 +29,7 @@ public class AccountServiceIntegrationTest {
         account.setName("Test Name");
         account.setBalance(new BigDecimal("1000.00"));
 
-        Account accountSaved = autoService.save(account);
+        Account accountSaved = accountService.save(account);
         assertThat(accountSaved.getId()).isNotZero();
     }
 
@@ -38,7 +38,7 @@ public class AccountServiceIntegrationTest {
         Account account = new Account();
         account.setBalance(new BigDecimal("1000.00"));
 
-        autoService.save(account);
+        accountService.save(account);
     }
 
     @Test()
@@ -47,10 +47,24 @@ public class AccountServiceIntegrationTest {
         account.setBalance(new BigDecimal("1000.00"));
 
         try {
-            autoService.save(account);
+            accountService.save(account);
         } catch (javax.validation.ConstraintViolationException c){
             assertThat(c.getConstraintViolations().size()).isGreaterThan(0);
             assertThat( c.getConstraintViolations().iterator().next().getPropertyPath().toString()).isEqualTo("name");
+        }
+    }
+
+    @Test()
+    public void whenSaveInvalidBalance_throwExceptionWithPropertyPath() {
+        Account account = new Account();
+        account.setName("Test Name");
+        account.setBalance(new BigDecimal("0.0031987238"));
+
+        try {
+            accountService.save(account);
+        } catch (javax.validation.ConstraintViolationException c) {
+            assertThat(c.getConstraintViolations().size()).isGreaterThan(0);
+            assertThat(c.getConstraintViolations().iterator().next().getPropertyPath().toString()).isEqualTo("balance");
         }
     }
 
@@ -60,7 +74,7 @@ public class AccountServiceIntegrationTest {
         account.setName("Test Negative");
         account.setBalance(new BigDecimal("-1000.00"));
 
-        autoService.save(account);
+        accountService.save(account);
         assertThat(true).isTrue();
 
     }
@@ -70,7 +84,9 @@ public class AccountServiceIntegrationTest {
         Account account = new Account();
         account.setName("Test Null Balance ");
 
-        Account accountSaved = autoService.save(account);
+        Account accountSaved = accountService.save(account);
         assertThat(accountSaved.getBalance()).isEqualTo(BigDecimal.ZERO);
     }
+
+
 }
