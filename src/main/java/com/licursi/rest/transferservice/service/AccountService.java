@@ -1,5 +1,8 @@
-package com.licursi.rest.transferservice.account;
+package com.licursi.rest.transferservice.service;
 
+import com.licursi.rest.transferservice.exceptions.BalanceConstraintViolationException;
+import com.licursi.rest.transferservice.model.Account;
+import com.licursi.rest.transferservice.repository.AccountRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

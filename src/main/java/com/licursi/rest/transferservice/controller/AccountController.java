@@ -1,5 +1,7 @@
-package com.licursi.rest.transferservice.account;
+package com.licursi.rest.transferservice.controller;
 
+import com.licursi.rest.transferservice.model.Account;
+import com.licursi.rest.transferservice.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

@@ -1,5 +1,6 @@
-package com.licursi.rest.transferservice.account;
+package com.licursi.rest.transferservice.repository;
 
+import com.licursi.rest.transferservice.model.Account;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

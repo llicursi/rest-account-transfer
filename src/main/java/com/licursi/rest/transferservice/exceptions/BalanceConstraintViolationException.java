@@ -1,4 +1,4 @@
-package com.licursi.rest.transferservice.account;
+package com.licursi.rest.transferservice.exceptions;
 
 /**
  *  Throws whenever the balance reaches an unexpected condition.

@@ -1,5 +1,7 @@
-package com.licursi.rest.transferservice.account;
+package com.licursi.rest.transferservice.service;
 
+import com.licursi.rest.transferservice.exceptions.BalanceConstraintViolationException;
+import com.licursi.rest.transferservice.model.Account;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
