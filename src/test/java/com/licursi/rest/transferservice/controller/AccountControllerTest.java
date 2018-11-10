@@ -40,8 +40,6 @@ public class AccountControllerTest {
 
     @Before
     public void setup() {
-        // We would need this line if we would not use MockitoJUnitRunner
-        // MockitoAnnotations.initMocks(this);
         // Initializes the JacksonTester
         JacksonTester.initFields(this, new ObjectMapper());
         // MockMvc standalone approach

@@ -11,8 +11,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.math.BigDecimal;
-
+import static com.licursi.rest.transferservice.AccountUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -26,9 +25,6 @@ public class AccountServiceTest {
 
     @InjectMocks
     private AccountService accountService;
-
-    // Tests for :
-    // public Account save(Account account) {
 
     @Before
     public void setUp() throws Exception {
@@ -59,36 +55,7 @@ public class AccountServiceTest {
     }
 
 
-    /*
-     * Auxiliar account type A generated without ID
-     */
-    private static Account generateAccountANullId() {
-        // TODO Convert into a factory
-        Account account = new Account();
-        account.setName("Test Name");
-        account.setBalance(new BigDecimal("1000.00"));
-        return account;
-    }
 
-    /*
-     * Auxiliar account type A generated without ID
-     */
-    private static Account generateAccountAWithId() {
-        // TODO Convert into a factory
-        Account account = generateAccountANullId();
-        account.setId(6);
-        return account;
-    }
-
-    /*
-     * Auxiliar account type A generated without ID
-     */
-    private static Account generateAccountANegative() {
-        // TODO Convert into a factory
-        Account account = generateAccountANullId();
-        account.setBalance(new BigDecimal("-1000.00"));
-        return account;
-    }
 
 
 }
