@@ -5,7 +5,7 @@ import com.licursi.rest.transferservice.model.Account;
 import java.math.BigDecimal;
 import java.util.Random;
 
-
+// TODO: Convert to a builder
 public class AccountUtils {
 
     private static final Random random = new Random();
@@ -51,6 +51,15 @@ public class AccountUtils {
     public static Account generateAccountANegative() {
         Account account = generateAccountANullId();
         account.setBalance(new BigDecimal("-1000.00"));
+        return account;
+    }
+
+    /*
+     * Generate random account
+     */
+    public static Account generateAccountB1() {
+        Account account = generateAccountANullId();
+        account.setId(random.nextInt(100));
         return account;
     }
 }

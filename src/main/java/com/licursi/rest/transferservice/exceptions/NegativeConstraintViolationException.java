@@ -1,9 +1,10 @@
 package com.licursi.rest.transferservice.exceptions;
 
 /**
- * Throws whenever the balance reaches an unexpected condition.
+ * Throws on any attempt of using negative value on Account operations
  */
-public class NegativeConstraintViolationException extends RuntimeException {
+public class NegativeConstraintViolationException extends Exception {
+
     public NegativeConstraintViolationException(String message) {
         super(message);
     }

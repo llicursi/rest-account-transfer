@@ -1,12 +1,10 @@
 package com.licursi.rest.transferservice.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Min;
@@ -16,12 +14,13 @@ import java.math.BigDecimal;
 @Data
 @ToString
 @AllArgsConstructor
+@EqualsAndHashCode
 @NoArgsConstructor
 @Entity
 public class Account {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @NotNull
