@@ -1,5 +1,7 @@
 package com.licursi.rest.transferservice.controller;
 
+import com.licursi.rest.transferservice.exceptions.AccountNotFoundException;
+import com.licursi.rest.transferservice.exceptions.BalanceConstraintViolationException;
 import com.licursi.rest.transferservice.model.Account;
 import com.licursi.rest.transferservice.service.AccountService;
 import com.licursi.rest.transferservice.service.TransferService;
@@ -27,14 +29,14 @@ public class AccountController {
     }
 
     @PostMapping
-    public Account save(@RequestBody Account account) {
+    public Account save(@RequestBody Account account) throws BalanceConstraintViolationException {
         return accountService.save(account);
     }
 
     @PostMapping("/{source}/transfer/{target}")
     public Account transfer(@PathVariable Integer source,
                             @PathVariable Integer target,
-                            @RequestBody BigDecimal amount) {
+                            @RequestBody BigDecimal amount) throws AccountNotFoundException {
         Account sourceUpdated = transferService.processTransfer(source, target, amount);
         return sourceUpdated;
     }

@@ -29,6 +29,13 @@ public class AccountService {
 
 
     /**
+     * Locate an Account based on it's numeric unique id.
+     */
+    public Optional<Account> findById(Integer id) {
+        return accountRepository.findById(id);
+    }
+
+    /**
      * Retrieve the complete list of Accounts
      *
      * @return Iterable list of Accounts
@@ -43,7 +50,7 @@ public class AccountService {
      * @param account Account details
      * @return Save account details with ID
      */
-    public Account save(Account account) {
+    public synchronized Account save(Account account) throws BalanceConstraintViolationException {
         log.debug("save() " + account);
         if (account != null && account.getBalance() != null &&
                 account.getBalance().compareTo(new BigDecimal(0)) < 0) {
@@ -56,22 +63,37 @@ public class AccountService {
     /**
      * Removes from account balance a positive amount, resulting in a non-negative balance.
      *
-     * @param account some client account
+     * @param source some client account
      * @param amount  positive monetary value
      */
-    public void withdraw(Account account, BigDecimal amount) throws NegativeConstraintViolationException, BalanceConstraintViolationException {
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new NegativeConstraintViolationException("Invalid negative 'amount' on withdraw operation");
-        }
-        final BigDecimal newBalance = account.getBalance().subtract(amount);
-        account.setBalance(newBalance);
-        save(account);
+    public void withdraw(Account source, BigDecimal amount) throws NegativeConstraintViolationException, BalanceConstraintViolationException {
+        validatePositiveAmount(amount, "withdraw");
+        final BigDecimal newBalance = source.getBalance().subtract(amount);
+        source.setBalance(newBalance);
+        save(source);
     }
 
     /**
-     * Locate an Account based on it's numeric unique id.
+     * Adds new funds to an account balance with a positive monetary amount, resulting in a non-negative balance.
+     *
+     * @param target some client account
+     * @param amount positive monetary value
      */
-    public Optional<Account> findById(Integer id) {
-        return accountRepository.findById(id);
+    public void deposit(Account target, BigDecimal amount) throws NegativeConstraintViolationException, BalanceConstraintViolationException {
+        validatePositiveAmount(amount, "deposit");
+        final BigDecimal newBalance = target.getBalance().add(amount);
+        target.setBalance(newBalance);
+        save(target);
     }
+
+    // Rejects 0 or negative values
+    private void validatePositiveAmount(BigDecimal amount, String operation) throws NegativeConstraintViolationException {
+        if (amount.compareTo(BigDecimal.ZERO) < 0) {
+            throw new NegativeConstraintViolationException("Invalid negative amount on '" + operation + "' operation");
+        }
+        if (amount.compareTo(BigDecimal.ZERO) == 0) {
+            throw new NegativeConstraintViolationException("Invalid empty amount on '" + operation + "' operation");
+        }
+    }
+
 }

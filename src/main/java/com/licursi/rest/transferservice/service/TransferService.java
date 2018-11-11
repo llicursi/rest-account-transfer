@@ -1,5 +1,6 @@
 package com.licursi.rest.transferservice.service;
 
+import com.licursi.rest.transferservice.exceptions.AccountNotFoundException;
 import com.licursi.rest.transferservice.model.Account;
 import com.licursi.rest.transferservice.model.Transfer;
 import com.licursi.rest.transferservice.repository.TransferRepository;
@@ -30,17 +31,19 @@ public class TransferService {
     }
 
     @Transactional
-    public Account processTransfer(int source, int target, BigDecimal amount) {
+    public Account processTransfer(int source, int target, BigDecimal amount) throws AccountNotFoundException {
         log.debug("processTransfer(" + source + ", " + target + ", '" + amount.toString() + "')");
 
         final Optional<Account> sourceAccount = accountService.findById(source);
         final Optional<Account> targetAccount = accountService.findById(target);
-//        if (!sourceAccount.isPresent()){
-//            throw new AccountNotFoundException("Specified account (source) id '" + source + "' does not exist");
-//        }
-//        if (!targetAccount.isPresent()){
-//            throw new AccountNotFoundException("Specified account (source) id '" + source + "' does not exist");
-//        }
+
+        if (!sourceAccount.isPresent()) {
+            throw new AccountNotFoundException("Specified account (source) id '" + source + "' does not exist");
+        }
+        if (!targetAccount.isPresent()) {
+            throw new AccountNotFoundException("Specified account (target) id '" + target + "' does not exist");
+        }
+
         final Transfer transfer = new Transfer();
         transfer.setSource(sourceAccount.get());
         transfer.setTarget(targetAccount.get());

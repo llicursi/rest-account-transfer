@@ -6,9 +6,9 @@ import lombok.ToString;
 
 import javax.persistence.*;
 import javax.validation.constraints.Digits;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+
 
 @Data
 @ToString
@@ -31,7 +31,6 @@ public class Transfer {
     private Account target;
 
     @NotNull
-    @Digits(integer = 10, fraction = 2)
-    @Min(value = 0, message = "Transfer amount cannot be negative")
+    @Digits(integer = 15, fraction = 2)
     private BigDecimal amount;
 }
