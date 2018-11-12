@@ -16,3 +16,15 @@ insert into ACCOUNT(ID, NAME, BALANCE) values (15, 'Joffrey Baratheon'  ,    442
 insert into ACCOUNT(ID, NAME, BALANCE) values (16, 'Sandor Clegane'     ,       0.00);
 insert into ACCOUNT(ID, NAME, BALANCE) values (17, 'Tyrion Lannister'   ,    8713.19);
 insert into ACCOUNT(ID, NAME, BALANCE) values (18, 'Khal Drogo'         ,     731.00);
+
+
+insert into TRANSFER(ID, SOURCE_ID, TARGET_ID, AMOUNT) values ( 1, 17, 1, 333.46);
+insert into TRANSFER(ID, SOURCE_ID, TARGET_ID, AMOUNT) values ( 2, 1, 12, 1000.00);
+insert into TRANSFER(ID, SOURCE_ID, TARGET_ID, AMOUNT) values ( 3, 2, 13, 333.46);
+insert into TRANSFER(ID, SOURCE_ID, TARGET_ID, AMOUNT) values ( 4, 1, 13, 1000.00);
+insert into TRANSFER(ID, SOURCE_ID, TARGET_ID, AMOUNT) values ( 5, 3, 15, 1333.46);
+insert into TRANSFER(ID, SOURCE_ID, TARGET_ID, AMOUNT) values ( 6, 1, 14, 1000.00);
+insert into TRANSFER(ID, SOURCE_ID, TARGET_ID, AMOUNT) values ( 7, 2, 1, 1.46);
+insert into TRANSFER(ID, SOURCE_ID, TARGET_ID, AMOUNT) values ( 8, 1, 15, 1000.00);
+insert into TRANSFER(ID, SOURCE_ID, TARGET_ID, AMOUNT) values ( 9, 1, 14, 333.46);
+insert into TRANSFER(ID, SOURCE_ID, TARGET_ID, AMOUNT) values ( 10, 1, 11, 1.99);

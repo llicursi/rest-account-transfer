@@ -54,7 +54,7 @@ public class AccountService {
         log.debug("save() " + account);
         if (account != null && account.getBalance() != null &&
                 account.getBalance().compareTo(new BigDecimal(0)) < 0) {
-            throw new BalanceConstraintViolationException("Negative balance is not accepted");
+            throw new BalanceConstraintViolationException("Account balance for '" + account.getName() + " cannot be lower than 0");
         }
         return accountRepository.save(account);
     }
