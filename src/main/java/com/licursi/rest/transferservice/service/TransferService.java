@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 /**
  * Handles all valid transfer operation
@@ -33,29 +32,22 @@ public class TransferService {
     }
 
     @Transactional
-    public Account processTransfer(int source, int target, BigDecimal amount) throws AccountNotFoundException, NegativeConstraintViolationException, BalanceConstraintViolationException {
+    public Account processTransfer(long source, long target, BigDecimal amount) throws AccountNotFoundException, NegativeConstraintViolationException, BalanceConstraintViolationException {
         log.debug("processTransfer(" + source + ", " + target + ", '" + amount.toString() + "')");
 
-        final Optional<Account> sourceAccount = accountService.findById(source);
-        final Optional<Account> targetAccount = accountService.findById(target);
+        final Account sourceAccount = accountService.findById(source);
+        final Account targetAccount = accountService.findById(target);
 
-        if (!sourceAccount.isPresent()) {
-            throw new AccountNotFoundException("Specified account (source) id '" + source + "' does not exist");
-        }
-        if (!targetAccount.isPresent()) {
-            throw new AccountNotFoundException("Specified account (target) id '" + target + "' does not exist");
-        }
-
-        log.info("Starting transfer from " + sourceAccount.get() +
-                " to " + targetAccount.get() +
+        log.info("Starting transfer from " + sourceAccount +
+                " to " + targetAccount +
                 " (amount :" + amount + ")");
 
-        accountService.withdraw(sourceAccount.get(), amount);
-        accountService.deposit(targetAccount.get(), amount);
+        accountService.withdraw(sourceAccount, amount);
+        accountService.deposit(targetAccount, amount);
 
         final Transfer transfer = new Transfer();
-        transfer.setSource(sourceAccount.get());
-        transfer.setTarget(targetAccount.get());
+        transfer.setSource(sourceAccount);
+        transfer.setTarget(targetAccount);
         transfer.setAmount(amount);
 
         final Transfer savedTransfer = transferRepository.save(transfer);
@@ -68,7 +60,7 @@ public class TransferService {
         return savedTransfer.getSource();
     }
 
-    public Iterable<Transfer> findAllOutgoing(Integer source) {
+    public Iterable<Transfer> findAllOutgoing(Long source) {
         log.debug("findAllOutgoing(" + source + ")");
         Account sourceAccount = new Account();
         sourceAccount.setId(source);

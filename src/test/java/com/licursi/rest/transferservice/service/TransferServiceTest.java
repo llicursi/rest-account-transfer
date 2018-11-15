@@ -16,7 +16,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -36,25 +35,31 @@ public class TransferServiceTest {
     private Account account1;
     private Account account2;
 
-    private static final int SOURCE_ID = 1;
-    private static final int TARGET_ID = 2;
+    private static final long SOURCE_ID = 1;
+    private static final long TARGET_ID = 2;
     private static final BigDecimal DEFAULT_AMOUNT = new BigDecimal(100);
+    private Transfer transfer;
 
     @Before
     public void setUp() throws Exception {
 
         account1 = AccountBuilder.createGeneric("Source").id(SOURCE_ID).build();
         account2 = AccountBuilder.createGeneric("Target").id(SOURCE_ID).build();
+        transfer = new Transfer();
+        transfer.setSource(account1);
+        transfer.setAmount(DEFAULT_AMOUNT);
+        transfer.setTarget(account2);
+        transfer.setId(1L);
         MockitoAnnotations.initMocks(this);
     }
 
 
     @Test
-    public void whenSaveTransfer_thenReturnsSourceAccount() throws NegativeConstraintViolationException, BalanceConstraintViolationException, AccountNotFoundException {
+    public void givenSaveTransfer_whenTransferIsOk_thenReturnsSourceAccount() throws NegativeConstraintViolationException, BalanceConstraintViolationException, AccountNotFoundException {
 
 
-        when(accountService.findById(SOURCE_ID)).thenReturn(Optional.of(account1));
-        when(accountService.findById(TARGET_ID)).thenReturn(Optional.of(account2));
+        when(accountService.findById(SOURCE_ID)).thenReturn(account1);
+        when(accountService.findById(TARGET_ID)).thenReturn(account2);
 
         doNothing().when(spy(accountService)).withdraw(any(Account.class), any(BigDecimal.class));
         doNothing().when(spy(accountService)).deposit(any(Account.class), any(BigDecimal.class));
@@ -68,7 +73,9 @@ public class TransferServiceTest {
 
         final Account account = transferService.processTransfer(SOURCE_ID, TARGET_ID, DEFAULT_AMOUNT);
 
-        verify(accountService, times(2)).findById(any(Integer.class));
+        verify(accountService, times(2)).findById(any(Long.class));
+        verify(accountService, times(1)).withdraw(any(Account.class), any(BigDecimal.class));
+        verify(accountService, times(1)).deposit(any(Account.class), any(BigDecimal.class));
         verifyNoMoreInteractions(accountService);
 
         verify(transferRepository, times(1)).save(any(Transfer.class));
@@ -77,25 +84,43 @@ public class TransferServiceTest {
     }
 
     @Test(expected = AccountNotFoundException.class)
-    public void whenSaveTransferWithInvalidSource_throwAccountNotFoundException() throws NegativeConstraintViolationException, BalanceConstraintViolationException, AccountNotFoundException {
+    public void givenSaveTransfer_whenInvalidSource_throwAccountNotFoundException() throws NegativeConstraintViolationException, BalanceConstraintViolationException, AccountNotFoundException {
 
 
-        when(accountService.findById(SOURCE_ID)).thenReturn(Optional.empty());
-        when(accountService.findById(TARGET_ID)).thenReturn(Optional.of(account2));
+        when(accountService.findById(SOURCE_ID)).thenThrow(new AccountNotFoundException("Error message", SOURCE_ID));
+        when(accountService.findById(TARGET_ID)).thenReturn(account2);
 
         transferService.processTransfer(SOURCE_ID, TARGET_ID, DEFAULT_AMOUNT);
+
+        verify(accountService, times(1)).findById(any(Long.class));
+        verifyNoMoreInteractions(accountService);
 
     }
 
 
     @Test(expected = AccountNotFoundException.class)
-    public void whenSaveTransferWithInvalidTarget_throwAccountNotFoundException() throws NegativeConstraintViolationException, BalanceConstraintViolationException, AccountNotFoundException {
+    public void givenSaveTransfer_whenInvalidTarget_throwAccountNotFoundException() throws NegativeConstraintViolationException, BalanceConstraintViolationException, AccountNotFoundException {
 
-        when(accountService.findById(SOURCE_ID)).thenReturn(Optional.of(account1));
-        when(accountService.findById(TARGET_ID)).thenReturn(Optional.empty());
+        when(accountService.findById(SOURCE_ID)).thenReturn(account1);
+        when(accountService.findById(TARGET_ID)).thenThrow(new AccountNotFoundException("Error message", SOURCE_ID));
 
-        transferService.processTransfer(TARGET_ID, TARGET_ID, DEFAULT_AMOUNT);
+        transferService.processTransfer(SOURCE_ID, TARGET_ID, DEFAULT_AMOUNT);
+
+        verify(accountService, times(2)).findById(any(Long.class));
+        verifyNoMoreInteractions(accountService);
 
     }
+
+/*    @Test(expected = AccountNotFoundException.class)
+    public void givenFindAllOutgoing_whenExists_thenList(){
+
+
+        when(transferRepository.save(any(Transfer.class))).thenReturn(transfer);
+        transferService.findAllOutgoing(SOURCE_ID);
+
+        verify(accountService, times(2)).findById(any(Long.class));
+        verifyNoMoreInteractions(accountService);
+
+    }*/
 
 }

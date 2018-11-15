@@ -8,6 +8,7 @@ import com.licursi.rest.transferservice.model.Transfer;
 import com.licursi.rest.transferservice.service.AccountService;
 import com.licursi.rest.transferservice.service.TransferService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -31,21 +32,21 @@ public class AccountController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public Account save(@RequestBody Account account) throws BalanceConstraintViolationException {
         return accountService.save(account);
     }
 
     @PostMapping("/{source}/transfer/{target}")
-    public Account transfer(@PathVariable Integer source,
-                            @PathVariable Integer target,
+    public Account transfer(@PathVariable Long source,
+                            @PathVariable Long target,
                             @RequestBody BigDecimal amount) throws AccountNotFoundException, NegativeConstraintViolationException, BalanceConstraintViolationException {
         Account sourceUpdated = transferService.processTransfer(source, target, amount);
         return sourceUpdated;
     }
 
-    // TODO: Better wording needed
     @GetMapping("/{source}/outgoings")
-    public Iterable<Transfer> findAllOutgoing(@PathVariable Integer source) throws AccountNotFoundException {
+    public Iterable<Transfer> findAllOutgoing(@PathVariable Long source) {
         Iterable<Transfer> trasferBySource = transferService.findAllOutgoing(source);
         return trasferBySource;
     }

@@ -1,6 +1,7 @@
 package com.licursi.rest.transferservice.service;
 
 import com.licursi.rest.transferservice.AccountBuilder;
+import com.licursi.rest.transferservice.exceptions.AccountNotFoundException;
 import com.licursi.rest.transferservice.exceptions.BalanceConstraintViolationException;
 import com.licursi.rest.transferservice.exceptions.NegativeConstraintViolationException;
 import com.licursi.rest.transferservice.model.Account;
@@ -12,7 +13,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,7 +29,7 @@ public class AccountServiceIntegrationTest {
     @Before
     public void setup() {
 
-        accountJorahMormont = AccountBuilder.createGeneric("Jorah Mormont").id(7).balance("100000.00").build();
+        accountJorahMormont = AccountBuilder.createGeneric("Jorah Mormont").id(7L).balance("100000.00").build();
     }
 
     @Test
@@ -109,45 +109,44 @@ public class AccountServiceIntegrationTest {
     }
 
     @Test
-    public void whenDeposit100_thenAccountRiseBy100() throws BalanceConstraintViolationException, NegativeConstraintViolationException {
+    public void whenDeposit100_thenAccountRiseBy100() throws BalanceConstraintViolationException, NegativeConstraintViolationException, AccountNotFoundException {
         int finalValue = 100;
         BigDecimal raiseByValue = new BigDecimal("100");
 
         Account accountSandorClegane = accountService.save(AccountBuilder.createGeneric("Sandor Clegane").balance("0").build());
         accountService.deposit(accountSandorClegane, raiseByValue);
-        final Optional<Account> account = accountService.findById(accountSandorClegane.getId());
+        final Account account = accountService.findById(accountSandorClegane.getId());
 
-        assertThat(account.isPresent()).isTrue();
-        assertThat(account.get().getBalance().setScale(2)).isEqualTo(new BigDecimal(finalValue).setScale(2));
+
+        assertThat(account.getBalance().setScale(2)).isEqualTo(new BigDecimal(finalValue).setScale(2));
         assertThat(accountSandorClegane.getBalance().setScale(2)).isEqualTo(new BigDecimal(finalValue).setScale(2));
     }
 
 
     @Test
-    public void whenDepositFloatingValue_thenAccountRiseByFloatingValue() throws BalanceConstraintViolationException, NegativeConstraintViolationException {
+    public void whenDepositFloatingValue_thenAccountRiseByFloatingValue() throws BalanceConstraintViolationException, NegativeConstraintViolationException, AccountNotFoundException {
         BigDecimal raiseByValue = new BigDecimal("7.33");
         BigDecimal finalValue = new BigDecimal("17.99");
 
         Account accountAyraStark = accountService.save(AccountBuilder.createGeneric("Arya Stark").balance("10.66").build());
         accountService.deposit(accountAyraStark, raiseByValue);
-        final Optional<Account> account = accountService.findById(accountAyraStark.getId());
+        final Account account = accountService.findById(accountAyraStark.getId());
 
-        assertThat(account.isPresent()).isTrue();
-        assertThat(account.get().getBalance()).isEqualTo(finalValue);
+
+        assertThat(account.getBalance()).isEqualTo(finalValue);
         assertThat(accountAyraStark.getBalance()).isEqualTo(finalValue);
     }
 
     @Test
-    public void whenDepositHugeValue_thenAccountRiseByHugeValue() throws BalanceConstraintViolationException, NegativeConstraintViolationException {
+    public void whenDepositHugeValue_thenAccountRiseByHugeValue() throws BalanceConstraintViolationException, NegativeConstraintViolationException, AccountNotFoundException {
         BigDecimal raiseByValue = new BigDecimal("999999999989.33");
         BigDecimal finalValue = new BigDecimal("999999999999.99");
 
         Account accountRobyStark = accountService.save(AccountBuilder.createGeneric("Roby Stark").balance("10.66").build());
         accountService.deposit(accountRobyStark, raiseByValue);
-        final Optional<Account> account = accountService.findById(accountRobyStark.getId());
+        final Account account = accountService.findById(accountRobyStark.getId());
 
-        assertThat(account.isPresent()).isTrue();
-        assertThat(account.get().getBalance()).isEqualTo(finalValue);
+        assertThat(account.getBalance()).isEqualTo(finalValue);
         assertThat(accountRobyStark.getBalance()).isEqualTo(finalValue);
     }
 
@@ -162,47 +161,44 @@ public class AccountServiceIntegrationTest {
     }
 
     @Test
-    public void whenWithdraw100_thenBalanceReduceBy100() throws BalanceConstraintViolationException, NegativeConstraintViolationException {
+    public void whenWithdraw100_thenBalanceReduceBy100() throws BalanceConstraintViolationException, NegativeConstraintViolationException, AccountNotFoundException {
         BigDecimal reducedByValue = new BigDecimal("100");
         BigDecimal finalValue = new BigDecimal("0.00");
 
         Account accountSansaStark = accountService.save(AccountBuilder.createGeneric("Sansa Stark").balance("100").build());
         accountService.withdraw(accountSansaStark, reducedByValue);
-        final Optional<Account> account = accountService.findById(accountSansaStark.getId());
+        final Account account = accountService.findById(accountSansaStark.getId());
 
-        assertThat(account.isPresent()).isTrue();
-        assertThat(account.get().getBalance().setScale(2)).isEqualTo(finalValue.setScale(2));
+        assertThat(account.getBalance().setScale(2)).isEqualTo(finalValue.setScale(2));
         assertThat(accountSansaStark.getBalance().setScale(2)).isEqualTo(finalValue.setScale(2));
     }
 
 
     @Test
-    public void whenWithdrawFloatingValue_thenBalanceReduceByFloatingValueKeepingPrecision() throws BalanceConstraintViolationException, NegativeConstraintViolationException {
+    public void whenWithdrawFloatingValue_thenBalanceReduceByFloatingValueKeepingPrecision() throws BalanceConstraintViolationException, NegativeConstraintViolationException, AccountNotFoundException {
         BigDecimal initialValue = new BigDecimal("10.00");
         BigDecimal reducedByValue = new BigDecimal("9.99");
         BigDecimal finalValue = new BigDecimal("00.01");
 
         Account accountViserysTargaryen = accountService.save(AccountBuilder.createGeneric("Viserys Targaryen").balance(initialValue).build());
         accountService.withdraw(accountViserysTargaryen, reducedByValue);
-        final Optional<Account> account = accountService.findById(accountViserysTargaryen.getId());
+        final Account account = accountService.findById(accountViserysTargaryen.getId());
 
-        assertThat(account.isPresent()).isTrue();
-        assertThat(account.get().getBalance().setScale(2)).isEqualTo(finalValue.setScale(2));
+        assertThat(account.getBalance().setScale(2)).isEqualTo(finalValue.setScale(2));
         assertThat(accountViserysTargaryen.getBalance().setScale(2)).isEqualTo(finalValue.setScale(2));
 
     }
 
     @Test
-    public void whenWithdrawHugeValue_thenBalanceReduceByHugeValueKeepingPrecision() throws BalanceConstraintViolationException, NegativeConstraintViolationException {
+    public void whenWithdrawHugeValue_thenBalanceReduceByHugeValueKeepingPrecision() throws BalanceConstraintViolationException, NegativeConstraintViolationException, AccountNotFoundException {
         BigDecimal finalValue = new BigDecimal("10.66");
         BigDecimal reducedByValue = new BigDecimal("999999999989.33");
         BigDecimal initialValue = new BigDecimal("999999999999.99");
         Account accountCerseiLannister = accountService.save(AccountBuilder.createGeneric("Cersei Lannister").balance(initialValue).build());
         accountService.withdraw(accountCerseiLannister, reducedByValue);
-        final Optional<Account> account = accountService.findById(accountCerseiLannister.getId());
+        final Account account = accountService.findById(accountCerseiLannister.getId());
 
-        assertThat(account.isPresent()).isTrue();
-        assertThat(account.get().getBalance()).isEqualTo(finalValue);
+        assertThat(account.getBalance()).isEqualTo(finalValue);
         assertThat(accountCerseiLannister.getBalance()).isEqualTo(finalValue);
 
     }

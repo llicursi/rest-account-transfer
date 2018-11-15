@@ -23,7 +23,7 @@ public class AccountBuilder {
     /**
      * Define another id
      */
-    public AccountBuilder id(Integer id) {
+    public AccountBuilder id(Long id) {
         this.account.setId(id);
         return this;
     }
@@ -88,7 +88,7 @@ public class AccountBuilder {
      */
     public static AccountBuilder createGeneric() {
         final Account account = new Account();
-        account.setId(1);
+        account.setId(1L);
         account.setName("Person");
         account.setBalance(new BigDecimal("1000.00"));
         return new AccountBuilder(account);

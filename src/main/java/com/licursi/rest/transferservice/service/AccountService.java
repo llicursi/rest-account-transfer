@@ -1,5 +1,6 @@
 package com.licursi.rest.transferservice.service;
 
+import com.licursi.rest.transferservice.exceptions.AccountNotFoundException;
 import com.licursi.rest.transferservice.exceptions.BalanceConstraintViolationException;
 import com.licursi.rest.transferservice.exceptions.NegativeConstraintViolationException;
 import com.licursi.rest.transferservice.model.Account;
@@ -10,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 /**
  *
@@ -23,7 +23,7 @@ public class AccountService {
     private AccountRepository accountRepository;
 
     @Autowired
-    public AccountService(final AccountRepository accountRepository){
+    public AccountService(final AccountRepository accountRepository) {
         this.accountRepository = accountRepository;
     }
 
@@ -31,8 +31,8 @@ public class AccountService {
     /**
      * Locate an Account based on it's numeric unique id.
      */
-    public Optional<Account> findById(Integer id) {
-        return accountRepository.findById(id);
+    public Account findById(Long id) throws AccountNotFoundException {
+        return accountRepository.findById(id).orElseThrow(() -> new AccountNotFoundException("Can not find requested account", id));
     }
 
     /**
@@ -64,7 +64,7 @@ public class AccountService {
      * Removes from account balance a positive amount, resulting in a non-negative balance.
      *
      * @param source some client account
-     * @param amount  positive monetary value
+     * @param amount positive monetary value
      */
     public void withdraw(Account source, BigDecimal amount) throws NegativeConstraintViolationException, BalanceConstraintViolationException {
         validatePositiveAmount(amount, "withdraw");

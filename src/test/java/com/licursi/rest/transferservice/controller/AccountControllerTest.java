@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -65,14 +66,28 @@ public class AccountControllerTest {
 
     }
 
+
     @Test
-    public void whenPostAccount_thenStatusOkWithJsonResult() throws Exception {
+    public void whenGetAccountNoData_thenStatusOkAndEmptyJsonResult() throws Exception {
+
+        when(accountService.findAll()).thenReturn(new ArrayList<>()).getMock();
+        this.mockMvc.perform(get("/account"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)));
+
+        verify(accountService, times(1)).findAll();
+        verifyNoMoreInteractions(accountService);
+
+    }
+
+    @Test
+    public void whenPostAccount_thenStatusCreatedWithJsonResult() throws Exception {
         Account account = getArrayOfAccounts().get(0);
         when(accountService.save(account)).thenReturn(account);
         this.mockMvc.perform(post("/account")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(account)))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
 
         verify(accountService, times(1)).save(account);
         verifyNoMoreInteractions(accountService);
@@ -86,13 +101,13 @@ public class AccountControllerTest {
     private List<Account> getArrayOfAccounts() {
 
         Account account1 = new Account();
-        account1.setId(0);
+        account1.setId(0l);
         account1.setName("Jon Snow");
         account1.setBalance(new BigDecimal(0));
 
 
         Account account2  = new Account();
-        account2.setId(1);
+        account2.setId(1l);
         account2.setName("Cersei Lanister");
         account2.setBalance(new BigDecimal("109999000.20"));
 
