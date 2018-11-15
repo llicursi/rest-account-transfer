@@ -43,7 +43,7 @@ public class TransferRepositoryIntegrationTest {
     }
 
     @Test
-    public void whenSaveTransfer_thenReturnTransfer() {
+    public void givenSave_whenTransfer_thenReturnTransfer() {
 
 
         final Transfer transfer = new Transfer();
@@ -58,7 +58,7 @@ public class TransferRepositoryIntegrationTest {
     }
 
     @Test(expected = InvalidDataAccessApiUsageException.class)
-    public void whenSaveTransferWithoutTarget_throwException() {
+    public void givenSave_whenTransferWithoutTarget_throwException() {
 
         final Transfer transfer = new Transfer();
         transfer.setSource(acc1);
@@ -70,7 +70,7 @@ public class TransferRepositoryIntegrationTest {
     }
 
     @Test(expected = InvalidDataAccessApiUsageException.class)
-    public void whenSaveTransferWithoutSource_throwException() {
+    public void givenSave_whenTransferWithoutSource_throwException() {
 
         final Transfer transfer = new Transfer();
         transfer.setSource(acc3);

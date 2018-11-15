@@ -1,6 +1,4 @@
-package com.licursi.rest.transferservice;
-
-import com.licursi.rest.transferservice.model.Account;
+package com.licursi.rest.transferservice.model;
 
 import java.math.BigDecimal;
 

@@ -27,7 +27,7 @@ public class AccountController {
     }
 
     @GetMapping
-    public Iterable<Account> findAll(){
+    public Iterable<Account> findAll() {
         return accountService.findAll();
     }
 
@@ -45,8 +45,8 @@ public class AccountController {
         return sourceUpdated;
     }
 
-    @GetMapping("/{source}/outgoings")
-    public Iterable<Transfer> findAllOutgoing(@PathVariable Long source) {
+    @GetMapping("/{source}/outgoing")
+    public Iterable<Transfer> findAllOutgoing(@PathVariable Long source) throws AccountNotFoundException {
         Iterable<Transfer> trasferBySource = transferService.findAllOutgoing(source);
         return trasferBySource;
     }

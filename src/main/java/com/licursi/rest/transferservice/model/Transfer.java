@@ -1,5 +1,8 @@
 package com.licursi.rest.transferservice.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -11,7 +14,6 @@ import java.math.BigDecimal;
 
 
 @Data
-@ToString
 @NoArgsConstructor
 @Entity
 public class Transfer {
@@ -20,15 +22,18 @@ public class Transfer {
     @GeneratedValue
     private Long id;
 
+    @JsonIgnoreProperties({"balance"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "source_id")
     @NotNull
     private Account source;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"balance"})
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "target_id")
     @NotNull
     private Account target;
+
 
     @NotNull
     @Digits(integer = 15, fraction = 2)
