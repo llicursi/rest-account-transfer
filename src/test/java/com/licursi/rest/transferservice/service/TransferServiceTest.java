@@ -1,10 +1,10 @@
 package com.licursi.rest.transferservice.service;
 
-import com.licursi.rest.transferservice.AccountBuilder;
 import com.licursi.rest.transferservice.exceptions.AccountNotFoundException;
 import com.licursi.rest.transferservice.exceptions.BalanceConstraintViolationException;
 import com.licursi.rest.transferservice.exceptions.NegativeConstraintViolationException;
 import com.licursi.rest.transferservice.model.Account;
+import com.licursi.rest.transferservice.model.AccountBuilder;
 import com.licursi.rest.transferservice.model.Transfer;
 import com.licursi.rest.transferservice.repository.TransferRepository;
 import org.junit.Before;
@@ -44,6 +44,7 @@ public class TransferServiceTest {
     public void setUp() throws Exception {
 
         account1 = AccountBuilder.createGeneric("Source").id(SOURCE_ID).build();
+        account2 = AccountBuilder.createGeneric("Target").id(SOURCE_ID).build();
         account2 = AccountBuilder.createGeneric("Target").id(SOURCE_ID).build();
         transfer = new Transfer();
         transfer.setSource(account1);

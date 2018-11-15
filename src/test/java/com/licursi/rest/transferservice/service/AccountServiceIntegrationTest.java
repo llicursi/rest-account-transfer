@@ -1,10 +1,10 @@
 package com.licursi.rest.transferservice.service;
 
-import com.licursi.rest.transferservice.AccountBuilder;
 import com.licursi.rest.transferservice.exceptions.AccountNotFoundException;
 import com.licursi.rest.transferservice.exceptions.BalanceConstraintViolationException;
 import com.licursi.rest.transferservice.exceptions.NegativeConstraintViolationException;
 import com.licursi.rest.transferservice.model.Account;
+import com.licursi.rest.transferservice.model.AccountBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

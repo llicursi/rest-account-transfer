@@ -1,7 +1,7 @@
 package com.licursi.rest.transferservice.repository;
 
-import com.licursi.rest.transferservice.AccountBuilder;
 import com.licursi.rest.transferservice.model.Account;
+import com.licursi.rest.transferservice.model.AccountBuilder;
 import com.licursi.rest.transferservice.model.Transfer;
 import org.junit.Assert;
 import org.junit.Before;
