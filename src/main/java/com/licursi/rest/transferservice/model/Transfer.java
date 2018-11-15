@@ -23,7 +23,7 @@ public class Transfer {
     private Long id;
 
     @JsonIgnoreProperties({"balance"})
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "source_id")
     @NotNull
     private Account source;

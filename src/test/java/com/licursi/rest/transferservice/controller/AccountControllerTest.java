@@ -1,8 +1,11 @@
 package com.licursi.rest.transferservice.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.licursi.rest.transferservice.exceptions.AccountNotFoundException;
 import com.licursi.rest.transferservice.model.Account;
+import com.licursi.rest.transferservice.model.Transfer;
 import com.licursi.rest.transferservice.service.AccountService;
+import com.licursi.rest.transferservice.service.TransferService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,6 +37,8 @@ public class AccountControllerTest {
 
     @Mock
     private AccountService accountService;
+    @Mock
+    private TransferService transferService;
 
     @InjectMocks
     private AccountController accountController;
@@ -94,6 +99,56 @@ public class AccountControllerTest {
 
     }
 
+    @Test
+    public void whenGetOutgoingByExistentAccountId_thenStatusOkWithJsonResult() throws Exception {
+
+        when(transferService.findAllOutgoing(1l)).thenReturn(getArrayOfTransfers()).getMock();
+        this.mockMvc.perform(get("/account/1/outgoing"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(3)))
+                .andExpect(jsonPath("$[0].id", is(1)))
+                .andExpect(jsonPath("$[0].source.name", is("Jon Snow")))
+                .andExpect(jsonPath("$[0].target.name", is("Cersei Lanister")))
+                .andExpect(jsonPath("$[0].amount", is(500)))
+                .andExpect(jsonPath("$[1].id", is(2)))
+                .andExpect(jsonPath("$[1].source.name", is("Jon Snow")))
+                .andExpect(jsonPath("$[1].target.name", is("Cersei Lanister")))
+                .andExpect(jsonPath("$[1].amount", is(750)))
+                .andExpect(jsonPath("$[2].id", is(3)))
+                .andExpect(jsonPath("$[2].source.name", is("Jon Snow")))
+                .andExpect(jsonPath("$[2].target.name", is("Cersei Lanister")))
+                .andExpect(jsonPath("$[2].amount", is(1400)));
+
+        verify(transferService, times(1)).findAllOutgoing(1l);
+        verifyNoMoreInteractions(transferService);
+
+    }
+
+    @Test
+    public void whenGetOutgoingAccountWithNoData_thenStatusOkAndEmptyJsonResult() throws Exception {
+
+        when(transferService.findAllOutgoing(2l)).thenReturn(new ArrayList<>()).getMock();
+        this.mockMvc.perform(get("/account/9/outgoing"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)));
+
+        verify(transferService, times(2)).findAllOutgoing(2l);
+        verifyNoMoreInteractions(transferService);
+
+    }
+
+    @Test
+    public void whenGetOutgoingByNonExistentAccountId_thenReturnException() throws Exception {
+
+        when(transferService.findAllOutgoing(40l)).thenThrow(AccountNotFoundException.class).getMock();
+        this.mockMvc.perform(get("/account/40/outgoing"))
+                .andExpect(status().isBadRequest());
+
+        verify(transferService, times(1)).findAllOutgoing(40l);
+        verifyNoMoreInteractions(transferService);
+    }
+
+
     /**
      * Generates a list of accounts for testing, using game of thrones characters
      * @return List of Accounts
@@ -112,6 +167,35 @@ public class AccountControllerTest {
         account2.setBalance(new BigDecimal("109999000.20"));
 
         return Arrays.asList(account1, account2);
+    }
+
+    /**
+     * Generates a list of outgoings for testing
+     * @return List of Outgoings
+     */
+    private List<Transfer> getArrayOfTransfers() {
+
+        List<Account> accountList = getArrayOfAccounts();
+
+        Transfer transfer1 = new Transfer();
+        transfer1.setId(1l);
+        transfer1.setSource(accountList.get(0));
+        transfer1.setTarget(accountList.get(1));
+        transfer1.setAmount(new BigDecimal(500));
+
+        Transfer transfer2 = new Transfer();
+        transfer2.setId(2l);
+        transfer2.setSource(accountList.get(0));
+        transfer2.setTarget(accountList.get(1));
+        transfer2.setAmount(new BigDecimal(750));
+
+        Transfer transfer3 = new Transfer();
+        transfer3.setId(3l);
+        transfer3.setSource(accountList.get(0));
+        transfer3.setTarget(accountList.get(1));
+        transfer3.setAmount(new BigDecimal(1400));
+
+        return Arrays.asList(transfer1, transfer2, transfer3);
     }
 
     public static String asJsonString(final Object obj) {

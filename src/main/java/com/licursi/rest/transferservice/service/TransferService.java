@@ -60,10 +60,10 @@ public class TransferService {
         return savedTransfer.getSource();
     }
 
-    public Iterable<Transfer> findAllOutgoing(Long source) {
+    public Iterable<Transfer> findAllOutgoing(Long source) throws AccountNotFoundException {
         log.debug("findAllOutgoing(" + source + ")");
-        Account sourceAccount = new Account();
-        sourceAccount.setId(source);
+
+        Account sourceAccount = accountService.findById(source);
         return transferRepository.findAllBySource(sourceAccount);
     }
 }
