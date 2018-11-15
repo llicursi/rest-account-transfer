@@ -51,4 +51,10 @@ public class AccountController {
         return trasferBySource;
     }
 
+    @GetMapping("/{source}/incoming")
+    public Iterable<Transfer> findAllIncoming(@PathVariable Long source) throws AccountNotFoundException {
+        Iterable<Transfer> trasferByTarget = transferService.findAllIncoming(source);
+        return trasferByTarget;
+    }
+
 }

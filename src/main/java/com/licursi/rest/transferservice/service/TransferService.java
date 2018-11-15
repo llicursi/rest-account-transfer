@@ -31,6 +31,21 @@ public class TransferService {
         this.accountService = accountService;
     }
 
+    /**
+     * Transfer a positive monetary amount from one source account to another account.<br>
+     *
+     * This operation is atomic, it will withdraw the money from one valid account and
+     * deposit into another valid account, but not causing the the source account to
+     * have a negative balance.
+     *
+     * @param source Account in which the money will be withdraw
+     * @param target Account in which the money will be deposit
+     * @param amount Money being transferred
+     * @return The source account after the transaction is completed.
+     * @throws AccountNotFoundException If any of the accounts does not exist
+     * @throws NegativeConstraintViolationException If attempt to transfer ZERO or NEGATIVE amount of money
+     * @throws BalanceConstraintViolationException If the resulting source account balance is negative
+     */
     @Transactional
     public Account processTransfer(long source, long target, BigDecimal amount) throws AccountNotFoundException, NegativeConstraintViolationException, BalanceConstraintViolationException {
         log.debug("processTransfer(" + source + ", " + target + ", '" + amount.toString() + "')");
@@ -60,10 +75,30 @@ public class TransferService {
         return savedTransfer.getSource();
     }
 
+    /**
+     * List all transfers from the specified account to another account
+     * @param source Account transferring amounts to another
+     * @return List of transfers, can be empty
+     * @throws AccountNotFoundException
+     */
     public Iterable<Transfer> findAllOutgoing(Long source) throws AccountNotFoundException {
         log.debug("findAllOutgoing(" + source + ")");
 
         Account sourceAccount = accountService.findById(source);
         return transferRepository.findAllBySource(sourceAccount);
+    }
+
+
+    /**
+     * List all transfers from any account to the specified target account
+     * @param account Account recieving
+     * @return List of transfers, can be empty
+     * @throws AccountNotFoundException
+     */
+    public Iterable<Transfer> findAllIncoming(Long account) throws AccountNotFoundException {
+        log.debug("findAllIncoming(" + account + ")");
+
+        Account targetAccount = accountService.findById(account);
+        return transferRepository.findAllByTarget(targetAccount);
     }
 }

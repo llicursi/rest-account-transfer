@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository;
 public interface TransferRepository extends CrudRepository<Transfer, Long> {
     Iterable<Transfer> findAllBySource(Account source);
 
+    Iterable<Transfer> findAllByTarget(Account source);
+
 }
