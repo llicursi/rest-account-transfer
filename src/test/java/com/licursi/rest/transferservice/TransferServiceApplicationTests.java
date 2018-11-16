@@ -9,9 +9,14 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest
 public class TransferServiceApplicationTests {
 
-	@Test
-	public void contextLoads() {
+    @Test
+    public void contextLoads() {
 
-	}
+    }
+
+    @Test
+    public void main() {
+        TransferServiceApplication.main(new String[]{});
+    }
 
 }

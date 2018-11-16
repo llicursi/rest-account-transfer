@@ -2,7 +2,7 @@ package com.licursi.rest.transferservice.service;
 
 import com.licursi.rest.transferservice.exceptions.AccountNotFoundException;
 import com.licursi.rest.transferservice.exceptions.BalanceConstraintViolationException;
-import com.licursi.rest.transferservice.exceptions.NegativeConstraintViolationException;
+import com.licursi.rest.transferservice.exceptions.PositiveValueViolationException;
 import com.licursi.rest.transferservice.model.Account;
 import com.licursi.rest.transferservice.model.Transfer;
 import com.licursi.rest.transferservice.repository.TransferRepository;
@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -43,22 +44,19 @@ public class TransferService {
      * @param amount Money being transferred
      * @return The source account after the transaction is completed.
      * @throws AccountNotFoundException If any of the accounts does not exist
-     * @throws NegativeConstraintViolationException If attempt to transfer ZERO or NEGATIVE amount of money
+     * @throws PositiveValueViolationException If attempt to transfer ZERO or NEGATIVE amount of money
      * @throws BalanceConstraintViolationException If the resulting source account balance is negative
      */
-    @Transactional
-    public Account processTransfer(long source, long target, BigDecimal amount) throws AccountNotFoundException, NegativeConstraintViolationException, BalanceConstraintViolationException {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public Account processTransfer(long source, long target, BigDecimal amount) throws AccountNotFoundException, PositiveValueViolationException, BalanceConstraintViolationException {
         log.debug("processTransfer(" + source + ", " + target + ", '" + amount.toString() + "')");
 
-        final Account sourceAccount = accountService.findById(source);
-        final Account targetAccount = accountService.findById(target);
+        final Account sourceAccount = accountService.withdraw(source, amount);
+        final Account targetAccount = accountService.deposit(target, amount);
 
         log.info("Starting transfer from " + sourceAccount +
                 " to " + targetAccount +
                 " (amount :" + amount + ")");
-
-        accountService.withdraw(sourceAccount, amount);
-        accountService.deposit(targetAccount, amount);
 
         final Transfer transfer = new Transfer();
         transfer.setSource(sourceAccount);

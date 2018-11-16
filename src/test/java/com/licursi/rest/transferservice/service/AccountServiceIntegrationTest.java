@@ -2,7 +2,7 @@ package com.licursi.rest.transferservice.service;
 
 import com.licursi.rest.transferservice.exceptions.AccountNotFoundException;
 import com.licursi.rest.transferservice.exceptions.BalanceConstraintViolationException;
-import com.licursi.rest.transferservice.exceptions.NegativeConstraintViolationException;
+import com.licursi.rest.transferservice.exceptions.PositiveValueViolationException;
 import com.licursi.rest.transferservice.model.Account;
 import com.licursi.rest.transferservice.model.AccountBuilder;
 import org.junit.Before;
@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
@@ -48,22 +49,15 @@ public class AccountServiceIntegrationTest {
         accountService.save(account);
     }
 
-    @Test(expected = org.springframework.transaction.TransactionSystemException.class)
-    public void givenSave_whenWithId_throwException() throws BalanceConstraintViolationException {
-        final Account account = AccountBuilder.createGeneric().noName().build();
-
-        accountService.save(account);
-    }
-
     @Test()
     public void givenSave_whenNullName_throwExceptionWithPropertyPath() {
         final Account account = AccountBuilder.createGeneric().noId().noName().build();
 
         try {
             accountService.save(account);
-        } catch (javax.validation.ConstraintViolationException c){
+        } catch (javax.validation.ConstraintViolationException c) {
             assertThat(c.getConstraintViolations().size()).isGreaterThan(0);
-            assertThat( c.getConstraintViolations().iterator().next().getPropertyPath().toString()).isEqualTo("name");
+            assertThat(c.getConstraintViolations().iterator().next().getPropertyPath().toString()).isEqualTo("name");
         } catch (BalanceConstraintViolationException e) {
             e.printStackTrace();
         }
@@ -97,116 +91,106 @@ public class AccountServiceIntegrationTest {
     }
 
 
-    @Test(expected = NegativeConstraintViolationException.class)
-    public void givenDeposit_whenNegativeAmount_throwException() throws BalanceConstraintViolationException, NegativeConstraintViolationException {
-        accountService.deposit(accountJorahMormont, new BigDecimal(-100));
+    @Test(expected = PositiveValueViolationException.class)
+    @Sql("/deposit-withdraw-data.sql")
+    public void givenDeposit_whenNegativeAmount_throwException() throws BalanceConstraintViolationException, PositiveValueViolationException, AccountNotFoundException {
+        accountService.deposit(accountJorahMormont.getId(), new BigDecimal(-100));
 
     }
 
-    @Test(expected = NegativeConstraintViolationException.class)
-    public void givenDeposit_wheneZero_throwException() throws BalanceConstraintViolationException, NegativeConstraintViolationException {
-        accountService.deposit(accountJorahMormont, new BigDecimal(0));
+    @Test(expected = PositiveValueViolationException.class)
+    @Sql("/deposit-withdraw-data.sql")
+    public void givenDeposit_whenZero_throwException() throws BalanceConstraintViolationException, PositiveValueViolationException, AccountNotFoundException {
+        accountService.deposit(accountJorahMormont.getId(), new BigDecimal(0));
     }
 
     @Test
-    public void givenDeposit_when100_thenAccountRiseBy100() throws BalanceConstraintViolationException, NegativeConstraintViolationException, AccountNotFoundException {
+    public void givenDeposit_whenNaturalValue_thenAccountRiseByNaturalValue() throws BalanceConstraintViolationException, PositiveValueViolationException, AccountNotFoundException {
         int finalValue = 100;
         BigDecimal raiseByValue = new BigDecimal("100");
 
         Account accountSandorClegane = accountService.save(AccountBuilder.createGeneric("Sandor Clegane").balance("0").build());
-        accountService.deposit(accountSandorClegane, raiseByValue);
-        final Account account = accountService.findById(accountSandorClegane.getId());
-
+        final Account account = accountService.deposit(accountSandorClegane.getId(), raiseByValue);
 
         assertThat(account.getBalance().setScale(2)).isEqualTo(new BigDecimal(finalValue).setScale(2));
-        assertThat(accountSandorClegane.getBalance().setScale(2)).isEqualTo(new BigDecimal(finalValue).setScale(2));
     }
 
 
     @Test
-    public void givenDeposit_whenFloatingValue_thenAccountRiseByFloatingValue() throws BalanceConstraintViolationException, NegativeConstraintViolationException, AccountNotFoundException {
+    public void givenDeposit_whenFloatingValue_thenAccountRiseByFloatingValue() throws BalanceConstraintViolationException, PositiveValueViolationException, AccountNotFoundException {
         BigDecimal raiseByValue = new BigDecimal("7.33");
         BigDecimal finalValue = new BigDecimal("17.99");
 
         Account accountAyraStark = accountService.save(AccountBuilder.createGeneric("Arya Stark").balance("10.66").build());
-        accountService.deposit(accountAyraStark, raiseByValue);
-        final Account account = accountService.findById(accountAyraStark.getId());
-
+        final Account account = accountService.deposit(accountAyraStark.getId(), raiseByValue);
 
         assertThat(account.getBalance()).isEqualTo(finalValue);
-        assertThat(accountAyraStark.getBalance()).isEqualTo(finalValue);
     }
 
     @Test
-    public void givenDeposit_whenHugeValue_thenAccountRiseByHugeValue() throws BalanceConstraintViolationException, NegativeConstraintViolationException, AccountNotFoundException {
+    public void givenDeposit_whenHugeValue_thenAccountRiseByHugeValue() throws BalanceConstraintViolationException, PositiveValueViolationException, AccountNotFoundException {
         BigDecimal raiseByValue = new BigDecimal("999999999989.33");
         BigDecimal finalValue = new BigDecimal("999999999999.99");
 
         Account accountRobyStark = accountService.save(AccountBuilder.createGeneric("Roby Stark").balance("10.66").build());
-        accountService.deposit(accountRobyStark, raiseByValue);
-        final Account account = accountService.findById(accountRobyStark.getId());
+        final Account account = accountService.deposit(accountRobyStark.getId(), raiseByValue);
 
         assertThat(account.getBalance()).isEqualTo(finalValue);
-        assertThat(accountRobyStark.getBalance()).isEqualTo(finalValue);
     }
 
-    @Test(expected = NegativeConstraintViolationException.class)
-    public void givenWithdraw_whenNegativeAmount_throwException() throws BalanceConstraintViolationException, NegativeConstraintViolationException {
-        accountService.withdraw(accountJorahMormont, new BigDecimal(-100));
+    @Test(expected = PositiveValueViolationException.class)
+    @Sql("/deposit-withdraw-data.sql")
+    public void givenWithdraw_whenNegativeAmount_throwException() throws BalanceConstraintViolationException, PositiveValueViolationException, AccountNotFoundException {
+        accountService.withdraw(accountJorahMormont.getId(), new BigDecimal(-100));
     }
 
-    @Test(expected = NegativeConstraintViolationException.class)
-    public void givenWithdraw_whenZero_throwException() throws BalanceConstraintViolationException, NegativeConstraintViolationException {
-        accountService.withdraw(accountJorahMormont, new BigDecimal(0));
+    @Test(expected = PositiveValueViolationException.class)
+    @Sql("/deposit-withdraw-data.sql")
+    public void givenWithdraw_whenZero_throwException() throws BalanceConstraintViolationException, PositiveValueViolationException, AccountNotFoundException {
+        accountService.withdraw(accountJorahMormont.getId(), new BigDecimal(0));
     }
 
     @Test
-    public void givenWithdraw_when100_thenBalanceReduceBy100() throws BalanceConstraintViolationException, NegativeConstraintViolationException, AccountNotFoundException {
+    public void givenWithdraw_when100_thenBalanceReduceBy100() throws BalanceConstraintViolationException, PositiveValueViolationException, AccountNotFoundException {
         BigDecimal reducedByValue = new BigDecimal("100");
         BigDecimal finalValue = new BigDecimal("0.00");
 
         Account accountSansaStark = accountService.save(AccountBuilder.createGeneric("Sansa Stark").balance("100").build());
-        accountService.withdraw(accountSansaStark, reducedByValue);
-        final Account account = accountService.findById(accountSansaStark.getId());
+        final Account account = accountService.withdraw(accountSansaStark.getId(), reducedByValue);
 
         assertThat(account.getBalance().setScale(2)).isEqualTo(finalValue.setScale(2));
-        assertThat(accountSansaStark.getBalance().setScale(2)).isEqualTo(finalValue.setScale(2));
     }
 
 
     @Test
-    public void givenWithdraw_whenFloatingValue_thenBalanceReduceByFloatingValueKeepingPrecision() throws BalanceConstraintViolationException, NegativeConstraintViolationException, AccountNotFoundException {
+    public void givenWithdraw_whenFloatingValue_thenBalanceReduceByFloatingValueKeepingPrecision() throws BalanceConstraintViolationException, PositiveValueViolationException, AccountNotFoundException {
         BigDecimal initialValue = new BigDecimal("10.00");
         BigDecimal reducedByValue = new BigDecimal("9.99");
         BigDecimal finalValue = new BigDecimal("00.01");
 
         Account accountViserysTargaryen = accountService.save(AccountBuilder.createGeneric("Viserys Targaryen").balance(initialValue).build());
-        accountService.withdraw(accountViserysTargaryen, reducedByValue);
-        final Account account = accountService.findById(accountViserysTargaryen.getId());
+        final Account account = accountService.withdraw(accountViserysTargaryen.getId(), reducedByValue);
 
         assertThat(account.getBalance().setScale(2)).isEqualTo(finalValue.setScale(2));
-        assertThat(accountViserysTargaryen.getBalance().setScale(2)).isEqualTo(finalValue.setScale(2));
 
     }
 
     @Test
-    public void givenWithdraw_whenHugeValue_thenBalanceReduceByHugeValueKeepingPrecision() throws BalanceConstraintViolationException, NegativeConstraintViolationException, AccountNotFoundException {
+    public void givenWithdraw_whenHugeValue_thenBalanceReduceByHugeValueKeepingPrecision() throws BalanceConstraintViolationException, PositiveValueViolationException, AccountNotFoundException {
         BigDecimal finalValue = new BigDecimal("10.66");
         BigDecimal reducedByValue = new BigDecimal("999999999989.33");
         BigDecimal initialValue = new BigDecimal("999999999999.99");
         Account accountCerseiLannister = accountService.save(AccountBuilder.createGeneric("Cersei Lannister").balance(initialValue).build());
-        accountService.withdraw(accountCerseiLannister, reducedByValue);
-        final Account account = accountService.findById(accountCerseiLannister.getId());
+        final Account account = accountService.withdraw(accountCerseiLannister.getId(), reducedByValue);
 
         assertThat(account.getBalance()).isEqualTo(finalValue);
-        assertThat(accountCerseiLannister.getBalance()).isEqualTo(finalValue);
 
     }
 
     @Test(expected = BalanceConstraintViolationException.class)
-    public void givenWithdraw_whenMoreThanAvailable_throwError() throws BalanceConstraintViolationException, NegativeConstraintViolationException {
+    public void givenWithdraw_whenMoreThanAvailable_throwError() throws BalanceConstraintViolationException, PositiveValueViolationException, AccountNotFoundException {
         Account accountBranStark = accountService.save(AccountBuilder.createGeneric("Bran Stark").balance("2").build());
-        accountService.withdraw(accountBranStark, new BigDecimal(3));
+        accountService.withdraw(accountBranStark.getId(), new BigDecimal(3));
     }
 
 
