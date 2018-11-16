@@ -3,6 +3,7 @@ package com.licursi.rest.transferservice.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.licursi.rest.transferservice.exceptions.AccountNotFoundException;
 import com.licursi.rest.transferservice.model.Account;
+import com.licursi.rest.transferservice.model.AccountBuilder;
 import com.licursi.rest.transferservice.model.Transfer;
 import com.licursi.rest.transferservice.service.AccountService;
 import com.licursi.rest.transferservice.service.TransferService;
@@ -27,6 +28,8 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -195,6 +198,35 @@ public class AccountControllerTest {
 
         verify(transferService, times(1)).findAllIncoming(50l);
         verifyNoMoreInteractions(transferService);
+    }
+
+
+    @Test
+    public void givenGetFindById_whenAccountDontExist_thenThrowException() throws Exception {
+
+        when(accountService.findById(50l)).thenThrow(AccountNotFoundException.class);
+        this.mockMvc.perform(get("/account/50"))
+                .andExpect(status().isBadRequest());
+
+        verify(accountService, times(1)).findById(any(Long.class));
+        verifyNoMoreInteractions(accountService);
+    }
+
+
+    @Test
+    public void givenGetFindById_whenAccountExist_thenReturnAccount() throws Exception {
+
+        when(accountService.findById(30l)).thenReturn(AccountBuilder.createGeneric("Jon Snow").id(30L).balance("40.40").build());
+        this.mockMvc.perform(get("/account/30"))
+                .andDo(print())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(30L))
+                .andExpect(jsonPath("$.name").value("Jon Snow"))
+                .andExpect(jsonPath("$.balance").value(new BigDecimal("40.40")));
+
+        verify(accountService, times(1)).findById(any(Long.class));
+        verifyNoMoreInteractions(accountService);
     }
 
     /**

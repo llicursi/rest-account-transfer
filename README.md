@@ -26,11 +26,12 @@ Given the magic of the swagger, the following endpoints should be documented and
 
 ### Web test
 | Method | Endpoint | Controller method | Short description |
-| ---- | --------- | ----------------------------------- | ----------------------------------------------------- |
-| GET  | `/account`  | findAll                             | List all accounts                                     |
-| POST | `/account`  | save                                | Save a new account                                    |
-| GET  | `/account/{source}/incoming` | findAllIncoming   | List all incomes from a ***source*** account          |
-| GET  | `/account/{source}/outgoing` | findAllOutgoing   | List all outgoing of a ***target*** account           |
+| ---- | --------- | ----------------------------------- | ------------------------------------------------------ |
+| GET  | `/account`  | findAll                             | List all accounts                                    |
+| POST | `/account`  | save                                | Save a new account                                   |
+| GET  | `/account/{accountId}`  | find                    | Get the details "name", "id", "balance" from a single account|
+| GET  | `/account/{accountId}/incoming` | findAllIncoming   | List all incomes from a ***source*** account          |
+| GET  | `/account/{accountId}/outgoing` | findAllOutgoing   | List all outgoing of a ***target*** account           |
 | POST | `/account/{source}/transfer/{target}` | transfer | Transfer some money from ***source*** to ***target*** |
 
 Use [swagger-ui](http://localhost:8080/swagger-ui.html) or call it directly like the following samples

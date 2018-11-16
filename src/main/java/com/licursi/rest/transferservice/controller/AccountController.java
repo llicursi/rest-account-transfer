@@ -31,6 +31,12 @@ public class AccountController {
         return accountService.findAll();
     }
 
+    @GetMapping("/{accountId}")
+    public Account find(@PathVariable Long accountId) throws AccountNotFoundException {
+        Account accountFound = accountService.findById(accountId);
+        return accountFound;
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Account save(@RequestBody Account account) throws BalanceConstraintViolationException {
@@ -47,15 +53,15 @@ public class AccountController {
         }
     }
 
-    @GetMapping(value = "/{source}/outgoing", consumes = "application/json")
-    public Iterable<Transfer> findAllOutgoing(@PathVariable Long source) throws AccountNotFoundException {
-        Iterable<Transfer> trasferBySource = transferService.findAllOutgoing(source);
+    @GetMapping(value = "/{accountId}/outgoing", consumes = "application/json")
+    public Iterable<Transfer> findAllOutgoing(@PathVariable Long accountId) throws AccountNotFoundException {
+        Iterable<Transfer> trasferBySource = transferService.findAllOutgoing(accountId);
         return trasferBySource;
     }
 
-    @GetMapping("/{source}/incoming")
-    public Iterable<Transfer> findAllIncoming(@PathVariable Long source) throws AccountNotFoundException {
-        Iterable<Transfer> trasferByTarget = transferService.findAllIncoming(source);
+    @GetMapping("/{accountId}/incoming")
+    public Iterable<Transfer> findAllIncoming(@PathVariable Long accountId) throws AccountNotFoundException {
+        Iterable<Transfer> trasferByTarget = transferService.findAllIncoming(accountId);
         return trasferByTarget;
     }
 
