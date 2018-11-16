@@ -61,10 +61,10 @@ public class AccountControllerTest {
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].id", is(0)))
                 .andExpect(jsonPath("$[0].name", is("Jon Snow")))
-                .andExpect(jsonPath("$[0].balance", is(0)))
+                .andExpect(jsonPath("$[0].balance", is(new BigDecimal("0.00").toString())))
                 .andExpect(jsonPath("$[1].id", is(1)))
                 .andExpect(jsonPath("$[1].name", is("Cersei Lanister")))
-                .andExpect(jsonPath("$[1].balance", is(109999000.20)));
+                .andExpect(jsonPath("$[1].balance", is(new BigDecimal("109999000.20").toString())));
 
         verify(accountService, times(1)).findAll();
         verifyNoMoreInteractions(accountService);
@@ -88,13 +88,13 @@ public class AccountControllerTest {
     @Test
     public void whenPostAccount_thenStatusCreatedWithJsonResult() throws Exception {
         Account account = getArrayOfAccounts().get(0);
-        when(accountService.save(account)).thenReturn(account);
+        when(accountService.save(any(Account.class))).thenReturn(account);
         this.mockMvc.perform(post("/account")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(account)))
                 .andExpect(status().isCreated());
 
-        verify(accountService, times(1)).save(account);
+        verify(accountService, times(1)).save(any(Account.class));
         verifyNoMoreInteractions(accountService);
 
     }
@@ -102,8 +102,8 @@ public class AccountControllerTest {
     @Test
     public void whenGetOutgoingByExistentAccountId_thenStatusOkWithJsonResult() throws Exception {
 
-        when(transferService.findAllOutgoing(1l)).thenReturn(getArrayOfTransfers()).getMock();
-        this.mockMvc.perform(get("/account/1/outgoing"))
+        when(transferService.findAllOutgoing(11L)).thenReturn(getArrayOfTransfers()).getMock();
+        this.mockMvc.perform(get("/account/11/outgoing").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(3)))
                 .andExpect(jsonPath("$[0].id", is(1)))
@@ -119,7 +119,7 @@ public class AccountControllerTest {
                 .andExpect(jsonPath("$[2].target.name", is("Cersei Lanister")))
                 .andExpect(jsonPath("$[2].amount", is(1400)));
 
-        verify(transferService, times(1)).findAllOutgoing(1l);
+        verify(transferService, times(1)).findAllOutgoing(11L);
         verifyNoMoreInteractions(transferService);
 
     }
@@ -128,7 +128,7 @@ public class AccountControllerTest {
     public void whenGetOutgoingAccountWithNoData_thenStatusOkAndEmptyJsonResult() throws Exception {
 
         when(transferService.findAllOutgoing(2l)).thenReturn(new ArrayList<>()).getMock();
-        this.mockMvc.perform(get("/account/2/outgoing"))
+        this.mockMvc.perform(get("/account/2/outgoing").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));
 
@@ -140,8 +140,8 @@ public class AccountControllerTest {
     @Test
     public void whenGetOutgoingByNonExistentAccountId_thenThrowException() throws Exception {
 
-        when(transferService.findAllOutgoing(40l)).thenThrow(AccountNotFoundException.class).getMock();
-        this.mockMvc.perform(get("/account/40/outgoing"))
+        when(transferService.findAllOutgoing(40L)).thenThrow(AccountNotFoundException.class);
+        this.mockMvc.perform(get("/account/40/outgoing").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
 
         verify(transferService, times(1)).findAllOutgoing(40l);
@@ -151,7 +151,7 @@ public class AccountControllerTest {
     @Test
     public void whenGetIncomingByExistentAccountId_thenStatusOkWithJsonResult() throws Exception {
 
-        when(transferService.findAllIncoming(2l)).thenReturn(getArrayOfTransfers()).getMock();
+        when(transferService.findAllIncoming(2L)).thenReturn(getArrayOfTransfers()).getMock();
         this.mockMvc.perform(get("/account/2/incoming"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(3)))
@@ -168,7 +168,7 @@ public class AccountControllerTest {
                 .andExpect(jsonPath("$[2].target.name", is("Cersei Lanister")))
                 .andExpect(jsonPath("$[2].amount", is(1400)));
 
-        verify(transferService, times(1)).findAllIncoming(2l);
+        verify(transferService, times(1)).findAllIncoming(2L);
         verifyNoMoreInteractions(transferService);
 
     }
@@ -176,12 +176,12 @@ public class AccountControllerTest {
     @Test
     public void whenGetIncomingAccountWithNoData_thenStatusOkAndEmptyJsonResult() throws Exception {
 
-        when(transferService.findAllIncoming(1l)).thenReturn(new ArrayList<>()).getMock();
-        this.mockMvc.perform(get("/account/1/incoming"))
+        when(transferService.findAllIncoming(10L)).thenReturn(new ArrayList<>()).getMock();
+        this.mockMvc.perform(get("/account/10/incoming"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));
 
-        verify(transferService, times(1)).findAllIncoming(1l);
+        verify(transferService, times(1)).findAllIncoming(10L);
         verifyNoMoreInteractions(transferService);
 
     }

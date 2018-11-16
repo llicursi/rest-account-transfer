@@ -2,7 +2,7 @@ package com.licursi.rest.transferservice.controller;
 
 import com.licursi.rest.transferservice.exceptions.AccountNotFoundException;
 import com.licursi.rest.transferservice.exceptions.BalanceConstraintViolationException;
-import com.licursi.rest.transferservice.exceptions.NegativeConstraintViolationException;
+import com.licursi.rest.transferservice.exceptions.PositiveValueViolationException;
 import com.licursi.rest.transferservice.model.Account;
 import com.licursi.rest.transferservice.model.Transfer;
 import com.licursi.rest.transferservice.service.AccountService;
@@ -40,12 +40,14 @@ public class AccountController {
     @PostMapping("/{source}/transfer/{target}")
     public Account transfer(@PathVariable Long source,
                             @PathVariable Long target,
-                            @RequestBody BigDecimal amount) throws AccountNotFoundException, NegativeConstraintViolationException, BalanceConstraintViolationException {
-        Account sourceUpdated = transferService.processTransfer(source, target, amount);
-        return sourceUpdated;
+                            @RequestBody BigDecimal amount) throws AccountNotFoundException, PositiveValueViolationException, BalanceConstraintViolationException {
+        synchronized (transferService) {
+            Account sourceUpdated = transferService.processTransfer(source, target, amount);
+            return sourceUpdated;
+        }
     }
 
-    @GetMapping("/{source}/outgoing")
+    @GetMapping(value = "/{source}/outgoing", consumes = "application/json")
     public Iterable<Transfer> findAllOutgoing(@PathVariable Long source) throws AccountNotFoundException {
         Iterable<Transfer> trasferBySource = transferService.findAllOutgoing(source);
         return trasferBySource;
