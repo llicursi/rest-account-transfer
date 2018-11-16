@@ -1,8 +1,8 @@
 package com.licursi.rest.transferservice.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.licursi.rest.transferservice.model.serializer.MoneySerializer;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -13,8 +13,6 @@ import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 @Data
-@ToString
-@EqualsAndHashCode
 @Entity
 public class Account {
 
@@ -27,6 +25,7 @@ public class Account {
 
     @NotNull
     @Digits(integer = 15, fraction = 2)
+    @JsonSerialize(using = MoneySerializer.class)
     private BigDecimal balance;
 
 
